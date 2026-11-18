@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Novela Visual - Demo</title>
+<style>
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    background: #000;
+    font-family: Georgia, "Times New Roman", serif;
+  }
+
+  /* ---------------- VISTA DE JUEGO ---------------- */
+  #vistaJuego {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+  }
+  .escenario {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    container-type: inline-size;
+    background: #111;
+  }
+  #escenario {
+    width: min(100vw, calc(100vh * 16 / 9));
+  }
+  .fondoCapa {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    transition: opacity 0.3s;
+  }
+  .personajeCapa {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 88%;
+    display: none;
+  }
+  #opciones {
+    position: absolute;
+    inset: 0 0 30% 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2cqw;
+    z-index: 3;
+  }
+  .opcion {
+    min-width: 35cqw;
+    padding: 1.2cqw 2.5cqw;
+    font-family: inherit;
+    font-size: 2cqw;
+    color: #fff;
+    background: rgba(20, 20, 40, 0.85);
+    border: 0.2cqw solid #ffd166;
+    border-radius: 1cqw;
+    cursor: pointer;
+  }
+  .opcion:hover {
+    background: #ffd166;
+    color: #111;
+  }
+  .nombreTag {
+    position: absolute;
+    left: 6%;
+    bottom: 27%;
+    padding: 0.5cqw 2cqw;
+    font-size: 2cqw;
+    font-weight: bold;
+    color: #111;
+    background: #ffd166;
+    border-radius: 1cqw 1cqw 0 0;
+    z-index: 2;
+    display: none;
+  }
+  .caja {
+    position: absolute;
+    left: 4%;
+    right: 4%;
+    bottom: 4%;
+    height: 23%;
+    box-sizing: border-box;
+    padding: 2cqw 3cqw;
+    background: rgba(10, 10, 25, 0.88);
+    border: 0.2cqw solid #ffd166;
+    border-radius: 1.5cqw;
+    z-index: 2;
+    cursor: pointer;
+  }
+  .textoCaja {
+    margin: 0;
+    font-size: 2.3cqw;
+    line-height: 1.4;
+    color: #fff;
+  }
+  #btnEditar {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+    padding: 6px 14px;
+    font-family: system-ui, sans-serif;
+    font-size: 14px;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #888;
+    border-radius: 6px;
+    cursor: pointer;
+    opacity: 0.2;
+  }
+  #btnEditar:hover {
+    opacity: 1;
+  }
+
+  /* ---------------- VISTA DE EDITOR ---------------- */
+  #vistaEditor {
+    display: none;
+    min-height: 100vh;
+    background: #1b1b24;
+    color: #eee;
+    font-family: system-ui, sans-serif;
+    font-size: 15px;
+  }
+  .barra {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: #12121a;
+    border-bottom: 1px solid #333;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+  .espacio { flex: 1; }
+  #estado { color: #ffd166; }
+  .cuerpo {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 16px;
+    padding: 16px;
+  }
+  .panelLista {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .item {
+    text-align: left;
+    padding: 8px 10px;
+    color: #eee;
+    background: #2a2a38;
+    border: 1px solid #3a3a4c;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .item.activo {
+    background: #ffd166;
+    color: #111;
+    border-color: #ffd166;
+  }
+  .panelForm {
+    max-width: 760px;
+  }
+  .campo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .campo label {
+    font-weight: bold;
+  }
+  .fila {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .fila input[type="text"] { flex: 1; }
+  input[type="text"], textarea, select {
+    padding: 8px;
+    color: #eee;
+    background: #2a2a38;
+    border: 1px solid #3a3a4c;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 15px;
+  }
+  textarea { resize: vertical; }
+  .boton {
+    padding: 8px 14px;
+    color: #111;
+    background: #ffd166;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  .boton.gris {
+    color: #eee;
+    background: #3a3a4c;
+  }
+  .boton.rojo {
+    color: #fff;
+    background: #a33;
+  }
+  .mini {
+    display: none;
+    max-height: 80px;
+    max-width: 140px;
+    border: 1px solid #555;
+    border-radius: 4px;
+    background: #000;
+  }
+  h3 { margin: 24px 0 10px 0; }
+  .acciones { display: flex; gap: 8px; margin-top: 24px; }
+  .previaWrap {
+    position: sticky;
+    top: 58px;
+    z-index: 4;
+    padding: 8px 0;
+    margin-bottom: 12px;
+    background: #1b1b24;
+  }
+  #previa {
+    width: 100%;
+    max-width: 480px;
+  }
+  .etiquetaFila {
+    min-width: 280px;
+  }
+  .valor {
+    min-width: 60px;
+  }
+  input[type="range"] {
+    flex: 1;
+    max-width: 260px;
+  }
+</style>
+</head>
+<body>
+
+  <!-- ============ JUEGO ============ -->
+  <div id="vistaJuego">
+    <button id="btnEditar">Editar</button>
+    <div id="escenario" class="escenario">
+      <div id="fondo" class="fondoCapa"></div>
+      <img id="personaje" class="personajeCapa" alt="">
+      <div id="opciones"></div>
+      <div id="nombre" class="nombreTag"></div>
+      <div id="caja" class="caja"><p id="texto" class="textoCaja"></p></div>
+    </div>
+  </div>
+
+  <!-- ============ EDITOR ============ -->
+  <div id="vistaEditor">
+    <div class="barra">
+      <strong>Editor de novela visual</strong>
+      <span id="estado"></span>
+      <span class="espacio"></span>
+      <button class="boton" id="btnGuardar">Guardar</button>
+      <button class="boton gris" id="btnProbar">Probar esta escena</button>
+      <button class="boton gris" id="btnJugarInicio">Jugar desde el inicio</button>
+    </div>
+    <div class="cuerpo">
+      <div class="panelLista">
+        <div id="listaEscenas"></div>
+        <button class="boton" id="btnNuevaEscena">+ Nueva escena</button>
+      </div>
+      <div class="panelForm" id="formulario"></div>
+    </div>
+  </div>
+
+<script>
+  const vistaJuego = document.getElementById("vistaJuego");
+  const vistaEditor = document.getElementById("vistaEditor");
+  const fondoEl = document.getElementById("fondo");
+  const personajeEl = document.getElementById("personaje");
+  const opcionesEl = document.getElementById("opciones");
+  const nombreEl = document.getElementById("nombre");
+  const cajaEl = document.getElementById("caja");
+  const textoEl = document.getElementById("texto");
+  const estadoEl = document.getElementById("estado");
+  const listaEscenasEl = document.getElementById("listaEscenas");
+  const formularioEl = document.getElementById("formulario");
+
+  let historia = [];          // todas las escenas
+  let imagenes = [];          // nombres de las imágenes disponibles
+  let escenaActual = null;    // escena que se está jugando
+  let indiceEditando = 0;     // escena que se está editando
+  let temporizador = null;
+  let hayCambios = false;
+  let modo = "juego";
+
+  // Estilo de la caja de texto (se guarda en estilo.json)
+  const estiloPorDefecto = {
+    colorFondo: "#0a0a19",
+    opacidad: 0.88,
+    colorBorde: "#ffd166",
+    colorTexto: "#ffffff",
+    colorNombre: "#ffd166",
+    colorTextoNombre: "#111111",
+    tamanoTexto: 2.3,
+    alto: 23,
+    redondeo: 1.5,
+    velocidad: 25,
+    posicion: "abajo",
+    fuente: "serif",
+    imagenCaja: "",
+    margenTexto: 3
+  };
+  let estilo = Object.assign({}, estiloPorDefecto);
+
+  const juegoCtx = {
+    escenario: document.getElementById("escenario"),
+    caja: cajaEl,
+    texto: textoEl,
+    nombre: nombreEl,
+    opciones: opcionesEl
+  };
+  let previa = null;   // elementos de la vista previa del editor
+
+  // =====================================================
+  //  CARGA INICIAL
+  // =====================================================
+  async function cargarTodo() {
+    try {
+      const respuesta = await fetch("/api/historia");
+      if (!respuesta.ok) {
+        throw new Error("No se pudo leer la historia");
+      }
+      historia = await respuesta.json();
+      await cargarImagenes();
+      await cargarEstilo();
+      jugarDesde(historia[0].id);
+    } catch (error) {
+      textoEl.textContent = "Error: " + error.message;
+    }
+  }
+
+  async function cargarImagenes() {
+    const respuesta = await fetch("/api/imagenes");
+    imagenes = await respuesta.json();
+  }
+
+  async function cargarEstilo() {
+    try {
+      const respuesta = await fetch("/api/estilo");
+      if (respuesta.ok) {
+        estilo = await respuesta.json();
+      }
+    } catch (error) {
+      estilo = Object.assign({}, estiloPorDefecto);
+    }
+  }
+
+  async function leerError(respuesta) {
+    try {
+      const datos = await respuesta.json();
+      if (datos.error) {
+        return datos.error;
+      }
+    } catch (e) {
+      // no era JSON
+    }
+    return "Error " + respuesta.status;
+  }
+
+  function buscarEscena(id) {
+    for (let i = 0; i < historia.length; i++) {
+      if (historia[i].id === id) {
+        return historia[i];
+      }
+    }
+    return null;
+  }
+
+  function buscarIndice(id) {
+    for (let i = 0; i < historia.length; i++) {
+      if (historia[i].id === id) {
+        return i;
+      }
+    }
+    return 0;
+  }
+
+  function resumen(escena) {
+    let t = escena.texto;
+    if (t === "") {
+      t = "(sin texto)";
+    }
+    if (t.length > 28) {
+      t = t.substring(0, 28) + "...";
+    }
+    return t;
+  }
+
+  function mostrarVista(nombreVista) {
+    modo = nombreVista;
+    if (nombreVista === "juego") {
+      vistaEditor.style.display = "none";
+      vistaJuego.style.display = "flex";
+    } else {
+      detenerTexto();
+      vistaJuego.style.display = "none";
+      vistaEditor.style.display = "block";
+      renderEditor();
+    }
+  }
+
+  // =====================================================
+  //  ESTILO DE LA CAJA DE TEXTO
+  // =====================================================
+  function hexARgba(hex, opacidad) {
+    let h = hex;
+    if (h.length !== 7 || h.charAt(0) !== "#") {
+      h = "#0a0a19";
+    }
+    const r = parseInt(h.substring(1, 3), 16);
+    const g = parseInt(h.substring(3, 5), 16);
+    const b = parseInt(h.substring(5, 7), 16);
+    return "rgba(" + r + "," + g + "," + b + "," + opacidad + ")";
+  }
+
+  function fuenteCss(clave) {
+    if (clave === "sans") {
+      return "system-ui, Arial, sans-serif";
+    }
+    if (clave === "mono") {
+      return "\"Courier New\", monospace";
+    }
+    if (clave === "cursiva") {
+      return "\"Comic Sans MS\", \"Segoe Print\", cursive";
+    }
+    return "Georgia, \"Times New Roman\", serif";
+  }
+
+  // Aplica el estilo a la caja del juego o a la de la vista previa
+  function aplicarEstilo(ctx) {
+    const alto = estilo.alto;
+    if (estilo.imagenCaja) {
+      // La caja usa una imagen (se estira para ocupar toda la caja)
+      ctx.caja.style.backgroundImage = "url(\"/img/" + encodeURIComponent(estilo.imagenCaja) + "\")";
+      ctx.caja.style.backgroundSize = "100% 100%";
+      ctx.caja.style.backgroundRepeat = "no-repeat";
+      ctx.caja.style.backgroundColor = "transparent";
+      ctx.caja.style.borderColor = "transparent";
+    } else {
+      ctx.caja.style.backgroundImage = "none";
+      ctx.caja.style.backgroundColor = hexARgba(estilo.colorFondo, estilo.opacidad);
+      ctx.caja.style.borderColor = estilo.colorBorde;
+    }
+    ctx.caja.style.borderRadius = estilo.redondeo + "cqw";
+    ctx.caja.style.height = alto + "%";
+    ctx.caja.style.padding = (estilo.margenTexto * 0.66) + "cqw " + estilo.margenTexto + "cqw";
+
+    ctx.texto.style.color = estilo.colorTexto;
+    ctx.texto.style.fontSize = estilo.tamanoTexto + "cqw";
+    ctx.texto.style.fontFamily = fuenteCss(estilo.fuente);
+
+    ctx.nombre.style.backgroundColor = estilo.colorNombre;
+    ctx.nombre.style.color = estilo.colorTextoNombre;
+    ctx.nombre.style.fontSize = (estilo.tamanoTexto * 0.9) + "cqw";
+    ctx.nombre.style.fontFamily = fuenteCss(estilo.fuente);
+
+    if (estilo.posicion === "arriba") {
+      ctx.caja.style.top = "4%";
+      ctx.caja.style.bottom = "auto";
+      ctx.nombre.style.top = (4 + alto) + "%";
+      ctx.nombre.style.bottom = "auto";
+      ctx.nombre.style.borderRadius = "0 0 1cqw 1cqw";
+      if (ctx.opciones) {
+        ctx.opciones.style.top = (alto + 7) + "%";
+        ctx.opciones.style.bottom = "0";
+      }
+    } else {
+      ctx.caja.style.top = "auto";
+      ctx.caja.style.bottom = "4%";
+      ctx.nombre.style.top = "auto";
+      ctx.nombre.style.bottom = (4 + alto) + "%";
+      ctx.nombre.style.borderRadius = "1cqw 1cqw 0 0";
+      if (ctx.opciones) {
+        ctx.opciones.style.top = "0";
+        ctx.opciones.style.bottom = (alto + 7) + "%";
+      }
+    }
+  }
+
+  // =====================================================
+  //  JUEGO
+  // =====================================================
+  function jugarDesde(id) {
+    mostrarVista("juego");
+    aplicarEstilo(juegoCtx);
+    irAEscena(id);
+  }
+
+  function irAEscena(id) {
+    let escena = buscarEscena(id);
+    if (escena === null) {
+      escena = historia[0];
+    }
+    escenaActual = escena;
+    mostrarEscena();
+  }
+
+  function mostrarEscena() {
+    opcionesEl.innerHTML = "";
+
+    // Fondo con pequeño fundido
+    const nombreFondo = escenaActual.fondo;
+    fondoEl.style.opacity = 0;
+    setTimeout(function () {
+      if (nombreFondo === "") {
+        fondoEl.style.backgroundImage = "none";
+      } else {
+        fondoEl.style.backgroundImage = "url(\"/img/" + encodeURIComponent(nombreFondo) + "\")";
+      }
+      fondoEl.style.opacity = 1;
+    }, 300);
+
+    // Personaje (si falta la imagen, se oculta y no da error)
+    if (escenaActual.personaje === "") {
+      personajeEl.style.display = "none";
+    } else {
+      personajeEl.onerror = function () {
+        personajeEl.style.display = "none";
+      };
+      personajeEl.onload = function () {
+        personajeEl.style.display = "block";
+      };
+      personajeEl.src = "/img/" + encodeURIComponent(escenaActual.personaje);
+    }
+
+    // Nombre de quien habla
+    if (escenaActual.hablante === "") {
+      nombreEl.style.display = "none";
+    } else {
+      nombreEl.textContent = escenaActual.hablante;
+      nombreEl.style.display = "block";
+    }
+
+    escribirTexto(escenaActual.texto);
+  }
+
+  function detenerTexto() {
+    clearInterval(temporizador);
+    temporizador = null;
+  }
+
+  // Texto letra por letra (click en la caja para saltarlo)
+  function escribirTexto(texto) {
+    detenerTexto();
+    textoEl.textContent = "";
+    if (texto === "") {
+      terminarTexto();
+      return;
+    }
+    if (estilo.velocidad <= 0) {
+      terminarTexto();
+      return;
+    }
+    let i = 0;
+    temporizador = setInterval(function () {
+      i++;
+      textoEl.textContent = texto.substring(0, i);
+      if (i >= texto.length) {
+        terminarTexto();
+      }
+    }, estilo.velocidad);
+  }
+
+  function terminarTexto() {
+    detenerTexto();
+    textoEl.textContent = escenaActual.texto;
+    mostrarOpciones();
+  }
+
+  function mostrarOpciones() {
+    opcionesEl.innerHTML = "";
+
+    // Si la escena no tiene opciones, se ofrece volver al inicio
+    if (escenaActual.opciones.length === 0) {
+      const botonInicio = document.createElement("button");
+      botonInicio.className = "opcion";
+      botonInicio.textContent = "Volver al inicio";
+      botonInicio.onclick = function () {
+        irAEscena(historia[0].id);
+      };
+      opcionesEl.appendChild(botonInicio);
+      return;
+    }
+
+    for (let i = 0; i < escenaActual.opciones.length; i++) {
+      const opcion = escenaActual.opciones[i];
+      const boton = document.createElement("button");
+      boton.className = "opcion";
+      boton.textContent = (i + 1) + ". " + opcion.texto;
+      boton.onclick = function () {
+        irAEscena(opcion.destino);
+      };
+      opcionesEl.appendChild(boton);
+    }
+  }
+
+  cajaEl.addEventListener("click", function () {
+    if (temporizador !== null) {
+      terminarTexto();
+    }
+  });
+
+  // Atajo: teclas 1, 2, 3... para elegir una opción
+  document.addEventListener("keydown", function (evento) {
+    if (modo !== "juego" || escenaActual === null || temporizador !== null) {
+      return;
+    }
+    const numero = parseInt(evento.key);
+    if (numero >= 1 && numero <= escenaActual.opciones.length) {
+      irAEscena(escenaActual.opciones[numero - 1].destino);
+    }
+  });
+
+  document.getElementById("btnEditar").addEventListener("click", function () {
+    if (escenaActual !== null) {
+      indiceEditando = buscarIndice(escenaActual.id);
+    }
+    mostrarVista("editor");
+  });
+
+  // =====================================================
+  //  EDITOR
+  // =====================================================
+  function marcarCambios() {
+    hayCambios = true;
+    estadoEl.textContent = "● Cambios sin guardar";
+  }
+
+  function renderEditor() {
+    if (indiceEditando >= historia.length) {
+      indiceEditando = 0;
+    }
+    renderListaEscenas();
+    renderFormulario();
+  }
+
+  function renderListaEscenas() {
+    listaEscenasEl.innerHTML = "";
+    for (let i = 0; i < historia.length; i++) {
+      const boton = document.createElement("button");
+      boton.className = "item";
+      if (i === indiceEditando) {
+        boton.className = "item activo";
+      }
+      let prefijo = "";
+      if (i === 0) {
+        prefijo = "★ ";
+      }
+      boton.textContent = prefijo + (i + 1) + ". " + resumen(historia[i]);
+      boton.style.display = "block";
+      boton.style.width = "100%";
+      boton.style.marginBottom = "6px";
+      boton.onclick = function () {
+        indiceEditando = i;
+        renderEditor();
+      };
+      listaEscenasEl.appendChild(boton);
+    }
+  }
+
+  function crearCampoTexto(titulo, valor, multilinea, alCambiar) {
+    const contenedor = document.createElement("div");
+    contenedor.className = "campo";
+    const etiqueta = document.createElement("label");
+    etiqueta.textContent = titulo;
+    let entrada;
+    if (multilinea) {
+      entrada = document.createElement("textarea");
+      entrada.rows = 4;
+    } else {
+      entrada = document.createElement("input");
+      entrada.type = "text";
+    }
+    entrada.value = valor;
+    entrada.addEventListener("input", function () {
+      alCambiar(entrada.value);
+    });
+    contenedor.appendChild(etiqueta);
+    contenedor.appendChild(entrada);
+    return contenedor;
+  }
+
+  function agregarOpcionSelect(select, valor, texto) {
+    const o = document.createElement("option");
+    o.value = valor;
+    o.textContent = texto;
+    select.appendChild(o);
+  }
+
+  async function subirImagen(archivo) {
+    const datos = new FormData();
+    datos.append("archivo", archivo);
+    const respuesta = await fetch("/api/imagen", { method: "POST", body: datos });
+    if (!respuesta.ok) {
+      throw new Error(await leerError(respuesta));
+    }
+    const resultado = await respuesta.json();
+    return resultado.nombre;
+  }
+
+  // Campo para elegir una imagen existente o subir una nueva
+  function crearCampoImagen(titulo, valorActual, alCambiar) {
+    const contenedor = document.createElement("div");
+    contenedor.className = "campo";
+
+    const etiqueta = document.createElement("label");
+    etiqueta.textContent = titulo;
+
+    const fila = document.createElement("div");
+    fila.className = "fila";
+
+    const select = document.createElement("select");
+    agregarOpcionSelect(select, "", "(ninguna)");
+    let encontrada = (valorActual === "");
+    for (let i = 0; i < imagenes.length; i++) {
+      agregarOpcionSelect(select, imagenes[i], imagenes[i]);
+      if (imagenes[i] === valorActual) {
+        encontrada = true;
+      }
+    }
+    if (!encontrada) {
+      agregarOpcionSelect(select, valorActual, valorActual + " (no existe)");
+    }
+    select.value = valorActual;
+
+    const miniatura = document.createElement("img");
+    miniatura.className = "mini";
+    miniatura.alt = "";
+
+    function actualizarMiniatura(nombre) {
+      if (nombre === "") {
+        miniatura.style.display = "none";
+        return;
+      }
+      miniatura.onerror = function () {
+        miniatura.style.display = "none";
+      };
+      miniatura.onload = function () {
+        miniatura.style.display = "block";
+      };
+      miniatura.src = "/img/" + encodeURIComponent(nombre);
+    }
+    actualizarMiniatura(valorActual);
+
+    select.addEventListener("change", function () {
+      actualizarMiniatura(select.value);
+      alCambiar(select.value);
+    });
+
+    const archivoInput = document.createElement("input");
+    archivoInput.type = "file";
+    archivoInput.accept = ".png,.jpg,.jpeg,.gif,.webp,.svg,image/*";
+    archivoInput.addEventListener("change", async function () {
+      if (archivoInput.files.length === 0) {
+        return;
+      }
+      try {
+        const nombreNuevo = await subirImagen(archivoInput.files[0]);
+        await cargarImagenes();
+        alCambiar(nombreNuevo);
+        renderFormulario();
+      } catch (error) {
+        alert("No se pudo subir la imagen: " + error.message);
+      }
+      archivoInput.value = "";
+    });
+
+    const textoSubir = document.createElement("span");
+    textoSubir.textContent = "o subir nueva:";
+
+    fila.appendChild(select);
+    fila.appendChild(textoSubir);
+    fila.appendChild(archivoInput);
+    fila.appendChild(miniatura);
+
+    contenedor.appendChild(etiqueta);
+    contenedor.appendChild(fila);
+    return contenedor;
+  }
+
+  function crearFilaOpcion(escena, indice) {
+    const opcion = escena.opciones[indice];
+    if (buscarEscena(opcion.destino) === null) {
+      opcion.destino = historia[0].id;
+    }
+
+    const fila = document.createElement("div");
+    fila.className = "fila";
+
+    const entradaTexto = document.createElement("input");
+    entradaTexto.type = "text";
+    entradaTexto.value = opcion.texto;
+    entradaTexto.addEventListener("input", function () {
+      opcion.texto = entradaTexto.value;
+      marcarCambios();
+    });
+
+    const selectDestino = document.createElement("select");
+    for (let j = 0; j < historia.length; j++) {
+      agregarOpcionSelect(selectDestino, historia[j].id, "Ir a: " + (j + 1) + ". " + resumen(historia[j]));
+    }
+    selectDestino.value = opcion.destino;
+    selectDestino.addEventListener("change", function () {
+      opcion.destino = selectDestino.value;
+      marcarCambios();
+    });
+
+    const botonQuitar = document.createElement("button");
+    botonQuitar.className = "boton rojo";
+    botonQuitar.textContent = "✕";
+    botonQuitar.onclick = function () {
+      escena.opciones.splice(indice, 1);
+      marcarCambios();
+      renderFormulario();
+    };
+
+    fila.appendChild(entradaTexto);
+    fila.appendChild(selectDestino);
+    fila.appendChild(botonQuitar);
+    return fila;
+  }
+
+  // ---------- vista previa y estilo de la caja ----------
+  function crearPrevia() {
+    const envoltorio = document.createElement("div");
+    envoltorio.className = "previaWrap";
+
+    const etiqueta = document.createElement("div");
+    etiqueta.textContent = "Vista previa de la escena";
+    etiqueta.style.marginBottom = "6px";
+    etiqueta.style.color = "#aaa";
+
+    const escenario = document.createElement("div");
+    escenario.className = "escenario";
+    escenario.id = "previa";
+
+    const fondo = document.createElement("div");
+    fondo.className = "fondoCapa";
+    const personaje = document.createElement("img");
+    personaje.className = "personajeCapa";
+    personaje.alt = "";
+    const nombre = document.createElement("div");
+    nombre.className = "nombreTag";
+    const caja = document.createElement("div");
+    caja.className = "caja";
+    const texto = document.createElement("p");
+    texto.className = "textoCaja";
+    caja.appendChild(texto);
+
+    escenario.appendChild(fondo);
+    escenario.appendChild(personaje);
+    escenario.appendChild(nombre);
+    escenario.appendChild(caja);
+
+    envoltorio.appendChild(etiqueta);
+    envoltorio.appendChild(escenario);
+
+    previa = {
+      escenario: escenario,
+      fondo: fondo,
+      personaje: personaje,
+      nombre: nombre,
+      caja: caja,
+      texto: texto,
+      opciones: null
+    };
+    return envoltorio;
+  }
+
+  function actualizarPrevia() {
+    if (previa === null) {
+      return;
+    }
+    const escena = historia[indiceEditando];
+
+    if (escena.fondo === "") {
+      previa.fondo.style.backgroundImage = "none";
+    } else {
+      previa.fondo.style.backgroundImage = "url(\"/img/" + encodeURIComponent(escena.fondo) + "\")";
+    }
+
+    if (escena.personaje === "") {
+      previa.personaje.style.display = "none";
+      previa.personaje.removeAttribute("src");
+    } else {
+      const nuevaRuta = "/img/" + encodeURIComponent(escena.personaje);
+      if (previa.personaje.getAttribute("src") !== nuevaRuta) {
+        previa.personaje.onerror = function () {
+          previa.personaje.style.display = "none";
+        };
+        previa.personaje.onload = function () {
+          previa.personaje.style.display = "block";
+        };
+        previa.personaje.src = nuevaRuta;
+      }
+    }
+
+    if (escena.hablante === "") {
+      previa.nombre.style.display = "none";
+    } else {
+      previa.nombre.textContent = escena.hablante;
+      previa.nombre.style.display = "block";
+    }
+
+    previa.texto.textContent = escena.texto;
+    aplicarEstilo(previa);
+  }
+
+  function crearFilaColor(titulo, propiedad) {
+    const fila = document.createElement("div");
+    fila.className = "fila";
+    const etiqueta = document.createElement("span");
+    etiqueta.className = "etiquetaFila";
+    etiqueta.textContent = titulo;
+    const entrada = document.createElement("input");
+    entrada.type = "color";
+    entrada.value = estilo[propiedad];
+    entrada.addEventListener("input", function () {
+      estilo[propiedad] = entrada.value;
+      marcarCambios();
+      actualizarPrevia();
+    });
+    fila.appendChild(etiqueta);
+    fila.appendChild(entrada);
+    return fila;
+  }
+
+  function crearFilaRango(titulo, propiedad, minimo, maximo, paso, escala, sufijo) {
+    const fila = document.createElement("div");
+    fila.className = "fila";
+    const etiqueta = document.createElement("span");
+    etiqueta.className = "etiquetaFila";
+    etiqueta.textContent = titulo;
+    const entrada = document.createElement("input");
+    entrada.type = "range";
+    entrada.min = minimo;
+    entrada.max = maximo;
+    entrada.step = paso;
+    entrada.value = Math.round(estilo[propiedad] * escala * 10) / 10;
+    const valor = document.createElement("span");
+    valor.className = "valor";
+    valor.textContent = entrada.value + sufijo;
+    entrada.addEventListener("input", function () {
+      estilo[propiedad] = Number(entrada.value) / escala;
+      valor.textContent = entrada.value + sufijo;
+      marcarCambios();
+      actualizarPrevia();
+    });
+    fila.appendChild(etiqueta);
+    fila.appendChild(entrada);
+    fila.appendChild(valor);
+    return fila;
+  }
+
+  function crearFilaSelect(titulo, propiedad, opciones) {
+    const fila = document.createElement("div");
+    fila.className = "fila";
+    const etiqueta = document.createElement("span");
+    etiqueta.className = "etiquetaFila";
+    etiqueta.textContent = titulo;
+    const select = document.createElement("select");
+    for (let i = 0; i < opciones.length; i++) {
+      agregarOpcionSelect(select, opciones[i][0], opciones[i][1]);
+    }
+    select.value = estilo[propiedad];
+    select.addEventListener("change", function () {
+      estilo[propiedad] = select.value;
+      marcarCambios();
+      actualizarPrevia();
+    });
+    fila.appendChild(etiqueta);
+    fila.appendChild(select);
+    return fila;
+  }
+
+  function crearSeccionEstilo() {
+    const seccion = document.createElement("div");
+
+    const titulo = document.createElement("h3");
+    titulo.textContent = "Caja de texto (vale para todas las escenas)";
+    seccion.appendChild(titulo);
+
+    seccion.appendChild(crearCampoImagen("Imagen de la caja (si elegís una, reemplaza el color y el borde)", estilo.imagenCaja, function (valor) {
+      estilo.imagenCaja = valor;
+      marcarCambios();
+      actualizarPrevia();
+    }));
+    seccion.appendChild(crearFilaColor("Color de la caja", "colorFondo"));
+    seccion.appendChild(crearFilaRango("Opacidad de la caja", "opacidad", 0, 100, 1, 100, " %"));
+    seccion.appendChild(crearFilaColor("Color del borde", "colorBorde"));
+    seccion.appendChild(crearFilaColor("Color del texto", "colorTexto"));
+    seccion.appendChild(crearFilaColor("Color de la etiqueta del nombre", "colorNombre"));
+    seccion.appendChild(crearFilaColor("Color del texto del nombre", "colorTextoNombre"));
+    seccion.appendChild(crearFilaRango("Tamaño del texto", "tamanoTexto", 1.2, 4, 0.1, 1, ""));
+    seccion.appendChild(crearFilaRango("Alto de la caja", "alto", 12, 40, 1, 1, " %"));
+    seccion.appendChild(crearFilaRango("Redondeo de las esquinas", "redondeo", 0, 4, 0.5, 1, ""));
+    seccion.appendChild(crearFilaRango("Margen interior del texto", "margenTexto", 0.5, 8, 0.5, 1, ""));
+    seccion.appendChild(crearFilaRango("Velocidad (ms por letra, 0 = al instante)", "velocidad", 0, 80, 5, 1, " ms"));
+    seccion.appendChild(crearFilaSelect("Posición de la caja", "posicion", [["abajo", "Abajo"], ["arriba", "Arriba"]]));
+    seccion.appendChild(crearFilaSelect("Tipo de letra", "fuente", [
+      ["serif", "Clásica (serif)"],
+      ["sans", "Moderna (sans)"],
+      ["mono", "Máquina de escribir"],
+      ["cursiva", "Cursiva"]
+    ]));
+
+    const botonRestablecer = document.createElement("button");
+    botonRestablecer.className = "boton gris";
+    botonRestablecer.textContent = "Restablecer estilo de la caja";
+    botonRestablecer.onclick = function () {
+      estilo = Object.assign({}, estiloPorDefecto);
+      marcarCambios();
+      renderFormulario();
+    };
+    seccion.appendChild(botonRestablecer);
+
+    return seccion;
+  }
+
+  function renderFormulario() {
+    formularioEl.innerHTML = "";
+    const escena = historia[indiceEditando];
+
+    formularioEl.appendChild(crearPrevia());
+
+    formularioEl.appendChild(crearCampoImagen("Fondo", escena.fondo, function (valor) {
+      escena.fondo = valor;
+      marcarCambios();
+      actualizarPrevia();
+    }));
+
+    formularioEl.appendChild(crearCampoImagen("Personaje", escena.personaje, function (valor) {
+      escena.personaje = valor;
+      marcarCambios();
+      actualizarPrevia();
+    }));
+
+    formularioEl.appendChild(crearCampoTexto("Quién habla (vacío = narrador)", escena.hablante, false, function (valor) {
+      escena.hablante = valor;
+      marcarCambios();
+      actualizarPrevia();
+    }));
+
+    formularioEl.appendChild(crearCampoTexto("Texto", escena.texto, true, function (valor) {
+      escena.texto = valor;
+      marcarCambios();
+      renderListaEscenas();
+      actualizarPrevia();
+    }));
+
+    const titulo = document.createElement("h3");
+    titulo.textContent = "Opciones (lo que puede elegir el jugador)";
+    formularioEl.appendChild(titulo);
+
+    for (let i = 0; i < escena.opciones.length; i++) {
+      formularioEl.appendChild(crearFilaOpcion(escena, i));
+    }
+
+    const botonAgregar = document.createElement("button");
+    botonAgregar.className = "boton gris";
+    botonAgregar.textContent = "+ Agregar opción";
+    botonAgregar.onclick = function () {
+      escena.opciones.push({ texto: "Nueva opción", destino: historia[0].id });
+      marcarCambios();
+      renderFormulario();
+    };
+    formularioEl.appendChild(botonAgregar);
+
+    const acciones = document.createElement("div");
+    acciones.className = "acciones";
+
+    const botonInicial = document.createElement("button");
+    botonInicial.className = "boton gris";
+    botonInicial.textContent = "★ Hacer escena inicial";
+    botonInicial.onclick = hacerInicial;
+
+    const botonEliminar = document.createElement("button");
+    botonEliminar.className = "boton rojo";
+    botonEliminar.textContent = "Eliminar escena";
+    botonEliminar.onclick = eliminarEscena;
+
+    acciones.appendChild(botonInicial);
+    acciones.appendChild(botonEliminar);
+    formularioEl.appendChild(acciones);
+
+    formularioEl.appendChild(crearSeccionEstilo());
+    actualizarPrevia();
+  }
+
+  function nuevoId() {
+    let n = historia.length + 1;
+    while (buscarEscena("e" + n) !== null) {
+      n++;
+    }
+    return "e" + n;
+  }
+
+  function nuevaEscena() {
+    const actual = historia[indiceEditando];
+    historia.push({
+      id: nuevoId(),
+      fondo: actual.fondo,
+      personaje: "",
+      hablante: "",
+      texto: "Escribí acá el texto de la escena.",
+      opciones: []
+    });
+    indiceEditando = historia.length - 1;
+    marcarCambios();
+    renderEditor();
+  }
+
+  function hacerInicial() {
+    if (indiceEditando === 0) {
+      return;
+    }
+    const escena = historia.splice(indiceEditando, 1)[0];
+    historia.unshift(escena);
+    indiceEditando = 0;
+    marcarCambios();
+    renderEditor();
+  }
+
+  function eliminarEscena() {
+    if (historia.length <= 1) {
+      alert("La historia necesita al menos una escena.");
+      return;
+    }
+    if (!confirm("¿Eliminar esta escena?")) {
+      return;
+    }
+    const idBorrada = historia[indiceEditando].id;
+    historia.splice(indiceEditando, 1);
+
+    // Se quitan las opciones que llevaban a la escena borrada
+    for (let i = 0; i < historia.length; i++) {
+      const lista = historia[i].opciones;
+      for (let j = lista.length - 1; j >= 0; j--) {
+        if (lista[j].destino === idBorrada) {
+          lista.splice(j, 1);
+        }
+      }
+    }
+
+    if (indiceEditando >= historia.length) {
+      indiceEditando = historia.length - 1;
+    }
+    marcarCambios();
+    renderEditor();
+  }
+
+  async function guardar() {
+    try {
+      const respuesta = await fetch("/api/historia", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(historia)
+      });
+      if (!respuesta.ok) {
+        throw new Error(await leerError(respuesta));
+      }
+      const respuestaEstilo = await fetch("/api/estilo", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(estilo)
+      });
+      if (!respuestaEstilo.ok) {
+        throw new Error(await leerError(respuestaEstilo));
+      }
+      hayCambios = false;
+      estadoEl.textContent = "✔ Guardado";
+    } catch (error) {
+      alert("No se pudo guardar: " + error.message);
+    }
+  }
+
+  document.getElementById("btnGuardar").addEventListener("click", guardar);
+  document.getElementById("btnNuevaEscena").addEventListener("click", nuevaEscena);
+  document.getElementById("btnProbar").addEventListener("click", function () {
+    jugarDesde(historia[indiceEditando].id);
+  });
+  document.getElementById("btnJugarInicio").addEventListener("click", function () {
+    jugarDesde(historia[0].id);
+  });
+
+  window.addEventListener("beforeunload", function (evento) {
+    if (hayCambios) {
+      evento.preventDefault();
+      evento.returnValue = "";
+    }
+  });
+
+  cargarTodo();
+</script>
+</body>
+</html>
