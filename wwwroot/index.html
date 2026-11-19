@@ -38,14 +38,20 @@
     background-position: center;
     transition: opacity 0.3s;
   }
-  .personajeCapa {
+  
+  .capaPersonajes {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .personajeImg{
     position: absolute;
     bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
     height: 88%;
-    display: none;
+    transform: translateX(-50%);
+    user-select: none;
   }
+
   #opciones {
     position: absolute;
     inset: 0 0 30% 0;
@@ -259,7 +265,7 @@
     <button id="btnEditar">Editar</button>
     <div id="escenario" class="escenario">
       <div id="fondo" class="fondoCapa"></div>
-      <img id="personaje" class="personajeCapa" alt="">
+      <div id="personajes" class="capaPersonajes" alt=""></div>
       <div id="opciones"></div>
       <div id="nombre" class="nombreTag"></div>
       <div id="caja" class="caja"><p id="texto" class="textoCaja"></p></div>
@@ -289,7 +295,7 @@
   const vistaJuego = document.getElementById("vistaJuego");
   const vistaEditor = document.getElementById("vistaEditor");
   const fondoEl = document.getElementById("fondo");
-  const personajeEl = document.getElementById("personaje");
+  const personajesEl = document.getElementById("personajes");
   const opcionesEl = document.getElementById("opciones");
   const nombreEl = document.getElementById("nombre");
   const cajaEl = document.getElementById("caja");
@@ -500,6 +506,56 @@
     }
   }
 
+// Dibuja todos los personajes de una escena dentro de un contenedor.
+// Si "arrastrable" es true (vista previa), se pueden mover con el mouse en horizontal.
+function dibujarPersonajes(contenedor, lista, arrastrable) {
+  contenedor.innerHTML = "";
+  for (let i = 0; i < lista.length; i++) {
+    const p = lista[i];
+    if (p.imagen === "") {
+      continue;
+    }
+    const img = document.createElement("img");
+    img.className = "personajeImg";
+    img.alt = "";
+    img.draggable = false;
+    img.onerror = function () {
+      img.style.display = "none";
+    };
+    img.src = "/img/" + encodeURIComponent(p.imagen);
+    img.style.left = p.x + "%";
+    img.style.bottom = p.y + "%";
+    img.style.height = (88 * p.escala) + "%";
+    img.style.zIndex = i;
+    img.style.transform = p.espejo ? "translateX(-50%) scaleX(-1)" : "translateX(-50%)";
+
+    if (arrastrable) {
+      img.style.pointerEvents = "auto";
+      img.style.cursor = "grab";
+      img.addEventListener("pointerdown", function (ev) {
+        ev.preventDefault();
+        img.setPointerCapture(ev.pointerId);
+        const rect = contenedor.getBoundingClientRect();
+
+        function mover(e) {
+          const x = ((e.clientX - rect.left) / rect.width) * 100;
+          p.x = Math.max(0, Math.min(100, Math.round(x)));
+          img.style.left = p.x + "%";
+        }
+        function soltar() {
+          img.removeEventListener("pointermove", mover);
+          img.removeEventListener("pointerup", soltar);
+          marcarCambios();
+          renderFormulario();   // actualiza los sliders
+        }
+        img.addEventListener("pointermove", mover);
+        img.addEventListener("pointerup", soltar);
+      });
+    }
+    contenedor.appendChild(img);
+  }
+}
+
   // =====================================================
   //  JUEGO
   // =====================================================
@@ -534,17 +590,19 @@
     }, 300);
 
     // Personaje (si falta la imagen, se oculta y no da error)
-    if (escenaActual.personaje === "") {
-      personajeEl.style.display = "none";
-    } else {
-      personajeEl.onerror = function () {
-        personajeEl.style.display = "none";
-      };
-      personajeEl.onload = function () {
-        personajeEl.style.display = "block";
-      };
-      personajeEl.src = "/img/" + encodeURIComponent(escenaActual.personaje);
-    }
+    // Personajes
+    dibujarPersonajes(personajesEl, escenaActual.personajes, false);
+    // if (escenaActual.personaje === "") {
+    //   personajeEl.style.display = "none";
+    // } else {
+    //   personajeEl.onerror = function () {
+    //     personajeEl.style.display = "none";
+    //   };
+    //   personajeEl.onload = function () {
+    //     personajeEl.style.display = "block";
+    //   };
+    //   personajeEl.src = "/img/" + encodeURIComponent(escenaActual.personaje);
+    // }
 
     // Nombre de quien habla
     if (escenaActual.hablante === "") {
@@ -859,9 +917,8 @@
 
     const fondo = document.createElement("div");
     fondo.className = "fondoCapa";
-    const personaje = document.createElement("img");
-    personaje.className = "personajeCapa";
-    personaje.alt = "";
+    const personajes = document.createElement("div");
+    personajes.className = "capaPersonajes";
     const nombre = document.createElement("div");
     nombre.className = "nombreTag";
     const caja = document.createElement("div");
@@ -871,7 +928,7 @@
     caja.appendChild(texto);
 
     escenario.appendChild(fondo);
-    escenario.appendChild(personaje);
+    escenario.appendChild(personajes);
     escenario.appendChild(nombre);
     escenario.appendChild(caja);
 
@@ -881,7 +938,7 @@
     previa = {
       escenario: escenario,
       fondo: fondo,
-      personaje: personaje,
+      personajes: personajes,
       nombre: nombre,
       caja: caja,
       texto: texto,
@@ -902,21 +959,22 @@
       previa.fondo.style.backgroundImage = "url(\"/img/" + encodeURIComponent(escena.fondo) + "\")";
     }
 
-    if (escena.personaje === "") {
-      previa.personaje.style.display = "none";
-      previa.personaje.removeAttribute("src");
-    } else {
-      const nuevaRuta = "/img/" + encodeURIComponent(escena.personaje);
-      if (previa.personaje.getAttribute("src") !== nuevaRuta) {
-        previa.personaje.onerror = function () {
-          previa.personaje.style.display = "none";
-        };
-        previa.personaje.onload = function () {
-          previa.personaje.style.display = "block";
-        };
-        previa.personaje.src = nuevaRuta;
-      }
-    }
+    dibujarPersonajes(previa.personajes, escena.personajes, true);
+    // if (escena.personaje === "") {
+    //   previa.personaje.style.display = "none";
+    //   previa.personaje.removeAttribute("src");
+    // } else {
+    //   const nuevaRuta = "/img/" + encodeURIComponent(escena.personaje);
+    //   if (previa.personaje.getAttribute("src") !== nuevaRuta) {
+    //     previa.personaje.onerror = function () {
+    //       previa.personaje.style.display = "none";
+    //     };
+    //     previa.personaje.onload = function () {
+    //       previa.personaje.style.display = "block";
+    //     };
+    //     previa.personaje.src = nuevaRuta;
+    //   }
+    // }
 
     if (escena.hablante === "") {
       previa.nombre.style.display = "none";
@@ -1040,6 +1098,134 @@
     return seccion;
   }
 
+  function crearRangoSimple(titulo, valor, minimo, maximo, paso, sufijo, alCambiar) {
+  const fila = document.createElement("div");
+  fila.className = "fila";
+  const etiqueta = document.createElement("span");
+  etiqueta.style.minWidth = "150px";
+  etiqueta.textContent = titulo;
+  const entrada = document.createElement("input");
+  entrada.type = "range";
+  entrada.min = minimo;
+  entrada.max = maximo;
+  entrada.step = paso;
+  entrada.value = valor;
+  const texto = document.createElement("span");
+  texto.className = "valor";
+  texto.textContent = valor + sufijo;
+  entrada.addEventListener("input", function () {
+    texto.textContent = entrada.value + sufijo;
+    alCambiar(Number(entrada.value));
+  });
+  fila.appendChild(etiqueta);
+  fila.appendChild(entrada);
+  fila.appendChild(texto);
+  return fila;
+}
+
+function crearBloquePersonaje(escena, indice) {
+  const p = escena.personajes[indice];
+
+  const bloque = document.createElement("div");
+  bloque.style.border = "1px solid #3a3a4c";
+  bloque.style.borderRadius = "8px";
+  bloque.style.padding = "10px";
+  bloque.style.marginBottom = "12px";
+
+  bloque.appendChild(crearCampoImagen("Personaje " + (indice + 1), p.imagen, function (valor) {
+    p.imagen = valor;
+    marcarCambios();
+    actualizarPrevia();
+  }));
+
+  bloque.appendChild(crearRangoSimple("Posición horizontal", p.x, 0, 100, 1, " %", function (v) {
+    p.x = v;
+    marcarCambios();
+    actualizarPrevia();
+  }));
+
+  bloque.appendChild(crearRangoSimple("Altura (elevación)", p.y, -20, 60, 1, " %", function (v) {
+    p.y = v;
+    marcarCambios();
+    actualizarPrevia();
+  }));
+
+  bloque.appendChild(crearRangoSimple("Tamaño", Math.round(p.escala * 100), 30, 200, 5, " %", function (v) {
+    p.escala = v / 100;
+    marcarCambios();
+    actualizarPrevia();
+  }));
+
+  const filaBotones = document.createElement("div");
+  filaBotones.className = "fila";
+
+  const etiquetaEspejo = document.createElement("label");
+  const checkEspejo = document.createElement("input");
+  checkEspejo.type = "checkbox";
+  checkEspejo.checked = p.espejo;
+  checkEspejo.addEventListener("change", function () {
+    p.espejo = checkEspejo.checked;
+    marcarCambios();
+    actualizarPrevia();
+  });
+  etiquetaEspejo.appendChild(checkEspejo);
+  etiquetaEspejo.appendChild(document.createTextNode(" Espejar"));
+
+  const botonAtras = document.createElement("button");
+  botonAtras.className = "boton gris";
+  botonAtras.textContent = "← Mandar atrás";
+  botonAtras.onclick = function () {
+    if (indice > 0) {
+      const tmp = escena.personajes[indice - 1];
+      escena.personajes[indice - 1] = p;
+      escena.personajes[indice] = tmp;
+      marcarCambios();
+      renderFormulario();
+    }
+  };
+
+  const botonAdelante = document.createElement("button");
+  botonAdelante.className = "boton gris";
+  botonAdelante.textContent = "Traer adelante →";
+  botonAdelante.onclick = function () {
+    if (indice < escena.personajes.length - 1) {
+      const tmp = escena.personajes[indice + 1];
+      escena.personajes[indice + 1] = p;
+      escena.personajes[indice] = tmp;
+      marcarCambios();
+      renderFormulario();
+    }
+  };
+
+  const botonQuitar = document.createElement("button");
+  botonQuitar.className = "boton rojo";
+  botonQuitar.textContent = "Quitar";
+  botonQuitar.onclick = function () {
+    escena.personajes.splice(indice, 1);
+    marcarCambios();
+    renderFormulario();
+  };
+
+  filaBotones.appendChild(etiquetaEspejo);
+  filaBotones.appendChild(botonAtras);
+  filaBotones.appendChild(botonAdelante);
+  filaBotones.appendChild(botonQuitar);
+  bloque.appendChild(filaBotones);
+
+  return bloque;
+}
+
+function agregarPersonaje(escena) {
+  let x = 50;
+  const cantidad = escena.personajes.length;
+  if (cantidad > 0) {
+    x = (cantidad % 2 === 1) ? 80 : 20;
+  }
+  escena.personajes.push({ imagen: "", x: x, y: 0, escala: 1, espejo: false });
+  marcarCambios();
+  renderFormulario();
+}
+
   function renderFormulario() {
     formularioEl.innerHTML = "";
     const escena = historia[indiceEditando];
@@ -1052,11 +1238,21 @@
       actualizarPrevia();
     }));
 
-    formularioEl.appendChild(crearCampoImagen("Personaje", escena.personaje, function (valor) {
-      escena.personaje = valor;
-      marcarCambios();
-      actualizarPrevia();
-    }));
+    const tituloPersonajes = document.createElement("h3");
+tituloPersonajes.textContent = "Personajes (podés arrastrarlos en la vista previa)";
+formularioEl.appendChild(tituloPersonajes);
+
+for (let i = 0; i < escena.personajes.length; i++) {
+  formularioEl.appendChild(crearBloquePersonaje(escena, i));
+}
+
+const botonAgregarPersonaje = document.createElement("button");
+botonAgregarPersonaje.className = "boton gris";
+botonAgregarPersonaje.textContent = "+ Agregar personaje";
+botonAgregarPersonaje.onclick = function () {
+  agregarPersonaje(escena);
+};
+formularioEl.appendChild(botonAgregarPersonaje);
 
     formularioEl.appendChild(crearCampoTexto("Quién habla (vacío = narrador)", escena.hablante, false, function (valor) {
       escena.hablante = valor;
@@ -1123,7 +1319,7 @@
     historia.push({
       id: nuevoId(),
       fondo: actual.fondo,
-      personaje: "",
+      personajes: [],
       hablante: "",
       texto: "Escribí acá el texto de la escena.",
       opciones: []

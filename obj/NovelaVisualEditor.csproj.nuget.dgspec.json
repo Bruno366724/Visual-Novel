@@ -1,35 +1,30 @@
 {
   "format": 1,
   "restore": {
-    "C:\\users\\alumnoFI\\desktop\\nv_dcv\\NovelaVisualEditor\\NovelaVisualEditor.csproj": {}
+    "C:\\Users\\lad\\Desktop\\Visual-Novel-main\\Visual-Novel\\NovelaVisualEditor.csproj": {}
   },
   "projects": {
-    "C:\\users\\alumnoFI\\desktop\\nv_dcv\\NovelaVisualEditor\\NovelaVisualEditor.csproj": {
+    "C:\\Users\\lad\\Desktop\\Visual-Novel-main\\Visual-Novel\\NovelaVisualEditor.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\users\\alumnoFI\\desktop\\nv_dcv\\NovelaVisualEditor\\NovelaVisualEditor.csproj",
+        "projectUniqueName": "C:\\Users\\lad\\Desktop\\Visual-Novel-main\\Visual-Novel\\NovelaVisualEditor.csproj",
         "projectName": "NovelaVisualEditor",
-        "projectPath": "C:\\users\\alumnoFI\\desktop\\nv_dcv\\NovelaVisualEditor\\NovelaVisualEditor.csproj",
-        "packagesPath": "C:\\Users\\alumnoFI\\.nuget\\packages\\",
-        "outputPath": "C:\\users\\alumnoFI\\desktop\\nv_dcv\\NovelaVisualEditor\\obj\\",
+        "projectPath": "C:\\Users\\lad\\Desktop\\Visual-Novel-main\\Visual-Novel\\NovelaVisualEditor.csproj",
+        "packagesPath": "C:\\Users\\lad\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\lad\\Desktop\\Visual-Novel-main\\Visual-Novel\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\alumnoFI\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\lad\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net10.0": {
+            "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {}
           }
@@ -44,10 +39,11 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.400"
       },
       "frameworks": {
         "net10.0": {
+          "framework": "net10.0",
           "targetAlias": "net10.0",
           "imports": [
             "net461",
@@ -68,7 +64,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.103/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.400/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

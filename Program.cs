@@ -171,6 +171,19 @@ static void Normalizar(List<Escena> lista)
         {
             lista[i].Opciones = new List<Opcion>();
         }
+        if (lista[i].Personajes == null)
+        {
+            lista[i].Personajes = new List<PersonajeEscena>();
+        }
+
+        // Migración: el campo viejo "personaje" pasa a la lista nueva
+        if (lista[i].Personajes.Count == 0 && lista[i].Personaje != "")
+        {
+            PersonajeEscena p = new PersonajeEscena();
+            p.Imagen = lista[i].Personaje;
+            lista[i].Personajes.Add(p);
+        }
+        lista[i].Personaje = "";
     }
 }
 
@@ -289,9 +302,19 @@ class Escena
     public string Id { get; set; } = "";
     public string Fondo { get; set; } = "";
     public string Personaje { get; set; } = "";
+    public List<PersonajeEscena> Personajes {get; set;} = new List<PersonajeEscena>(); 
     public string Hablante { get; set; } = "";
     public string Texto { get; set; } = "";
     public List<Opcion> Opciones { get; set; } = new List<Opcion>();
+}
+
+class PersonajeEscena
+{
+    public string Imagen { get; set; } = "";
+    public double X { get; set; } = 50;       // % horizontal (centro del personaje)
+    public double Y { get; set; } = 0;        // % de elevación desde abajo
+    public double Escala { get; set; } = 1;   // 1 = tamaño normal
+    public bool Espejo { get; set; } = false;
 }
 
 class Estilo

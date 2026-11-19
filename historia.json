@@ -2,7 +2,8 @@
   {
     "id": "e1",
     "fondo": "fondo_faro.svg",
-    "personaje": "personaje_marina.svg",
+    "personaje": "",
+    "personajes": [],
     "hablante": "",
     "texto": "LA PUERTA DEL FARO - Demo",
     "opciones": [
@@ -15,7 +16,16 @@
   {
     "id": "e2",
     "fondo": "fondo_playa.svg",
-    "personaje": "personaje_marina.svg",
+    "personaje": "",
+    "personajes": [
+      {
+        "imagen": "personaje_marina.svg",
+        "x": 50,
+        "y": 0,
+        "escala": 1,
+        "espejo": false
+      }
+    ],
     "hablante": "Marina",
     "texto": "Llevo tres noches viendo una luz en el faro abandonado. Hoy voy a averiguar qu\u00E9 es.",
     "opciones": [
@@ -32,7 +42,16 @@
   {
     "id": "e3",
     "fondo": "fondo_playa.svg",
-    "personaje": "personaje_marina.svg",
+    "personaje": "",
+    "personajes": [
+      {
+        "imagen": "personaje_marina.svg",
+        "x": 50,
+        "y": 0,
+        "escala": 1,
+        "espejo": false
+      }
+    ],
     "hablante": "Marina",
     "texto": "Con el sol, la luz se apag\u00F3. Quiz\u00E1s esta noche vuelva a aparecer...",
     "opciones": [
@@ -45,7 +64,16 @@
   {
     "id": "e4",
     "fondo": "fondo_faro.svg",
-    "personaje": "personaje_guardian.svg",
+    "personaje": "",
+    "personajes": [
+      {
+        "imagen": "personaje_guardian.svg",
+        "x": 50,
+        "y": 0,
+        "escala": 1,
+        "espejo": false
+      }
+    ],
     "hablante": "Guardi\u00E1n",
     "texto": "No esperaba visitas. La luz solo se enciende para quien trae algo que perdi\u00F3.",
     "opciones": [
@@ -62,7 +90,16 @@
   {
     "id": "e5",
     "fondo": "fondo_faro.svg",
-    "personaje": "personaje_guardian.svg",
+    "personaje": "",
+    "personajes": [
+      {
+        "imagen": "personaje_guardian.svg",
+        "x": 50,
+        "y": 0,
+        "escala": 1,
+        "espejo": false
+      }
+    ],
     "hablante": "Guardi\u00E1n",
     "texto": "La llave encaja. La l\u00E1mpara gira y todo el mar se ilumina. FINAL: La luz regresa.",
     "opciones": [
@@ -75,7 +112,16 @@
   {
     "id": "e6",
     "fondo": "fondo_faro.svg",
-    "personaje": "personaje_guardian.svg",
+    "personaje": "",
+    "personajes": [
+      {
+        "imagen": "personaje_guardian.svg",
+        "x": 50,
+        "y": 0,
+        "escala": 1,
+        "espejo": false
+      }
+    ],
     "hablante": "Guardi\u00E1n",
     "texto": "La l\u00E1mpara se apaga de golpe y el faro queda a oscuras. FINAL: La oscuridad.",
     "opciones": [
