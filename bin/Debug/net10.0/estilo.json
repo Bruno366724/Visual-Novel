@@ -1,0 +1,16 @@
+{
+  "colorFondo": "#0a0a19",
+  "opacidad": 0.88,
+  "colorBorde": "#ffd166",
+  "colorTexto": "#ffffff",
+  "colorNombre": "#ffd166",
+  "colorTextoNombre": "#111111",
+  "tamanoTexto": 2.3,
+  "alto": 23,
+  "redondeo": 1.5,
+  "velocidad": 25,
+  "posicion": "abajo",
+  "fuente": "serif",
+  "imagenCaja": "",
+  "margenTexto": 3
+}

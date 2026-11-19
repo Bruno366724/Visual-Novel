@@ -71,4 +71,5 @@ C:\Users\lad\desktop\visual-novel-main\visual-novel\obj\Debug\net10.0\refint\Nov
 C:\Users\lad\desktop\visual-novel-main\visual-novel\obj\Debug\net10.0\NovelaVisualEditor.pdb
 C:\Users\lad\desktop\visual-novel-main\visual-novel\obj\Debug\net10.0\NovelaVisualEditor.genruntimeconfig.cache
 C:\Users\lad\desktop\visual-novel-main\visual-novel\obj\Debug\net10.0\ref\NovelaVisualEditor.dll
-C:\Users\lad\Desktop\Visual-Novel-main\Visual-Novel\obj\Debug\net10.0\compressed\c5xhtomeum-{0}-m0qwgtkfi3-m0qwgtkfi3.gz
+C:\Users\lad\Desktop\Visual-Novel-main\Visual-Novel\bin\Debug\net10.0\estilo.json
+C:\Users\lad\Desktop\Visual-Novel-main\Visual-Novel\obj\Debug\net10.0\compressed\c5xhtomeum-{0}-f5kzmyrllu-f5kzmyrllu.gz
